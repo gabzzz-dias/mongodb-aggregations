@@ -1,70 +1,69 @@
-db.air_alliances.aggregate([
-  {
-    $unwind: "$airlines",
-  },
-  {
-    $lookup: {
-      from: "air_routes",
-      let: {
-        airlineFromAirRoutes: "$airlines",
+db.air_alliances.aggregate([{
+  $unwind: "$airlines",
+},
+{
+  $lookup: {
+    from: "air_routes",
+    let: {
+      airlineFromAirRoutes: "$airlines",
+    },
+    pipeline: [
+      {
+        $match: {
+          $or: [
+            {
+              airplane: "747",
+            },
+            {
+              airplane: "380",
+            },
+          ],
+
+        },
       },
-      pipeline: [
-        {
-          $match: {
-            $or: [
+      {
+        $match: {
+          $expr: {
+            $and: [
               {
-                airplane: "747",
-              },
-              {
-                airplane: "380",
+                $eq: [
+                  "$airline.name",
+                  "$$airlineFromAirRoutes",
+                ],
               },
             ],
-
           },
         },
-        {
-          $match: {
-            $expr: {
-              $and: [
-                {
-                  $eq: [
-                    "$airline.name",
-                    "$$airlineFromAirRoutes",
-                  ],
-                },
-              ],
-            },
-          },
-        },
-      ],
-      as: "airplaneAliances",
-    },
+      },
+    ],
+    as: "airplaneAliances",
   },
-  {
-    $match: {
-      airplaneAliances: {
-        $not: {
-          $size: 0,
-        },
+},
+{
+  $match: {
+    airplaneAliances: {
+      $not: {
+        $size: 0,
       },
     },
   },
-  {
-    $group: {
-      _id: "$name",
-      totalRotas: {
-        $sum: {
-          $size: "$airplaneAliances",
-        },
+},
+{
+  $group: {
+    _id: "$name",
+    totalRotas: {
+      $sum: {
+        $size: "$airplaneAliances",
       },
     },
   },
-  {
-    $sort: {
-      totalRotas: -1,
-    },
+},
+{
+  $sort: {
+    totalRotas: -1,
   },
-  {
-    $limit: 1,
-  },
+},
+{
+  $limit: 1,
+},
 ]);
