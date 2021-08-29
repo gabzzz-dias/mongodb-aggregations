@@ -4,13 +4,22 @@ db.movies.aggregate([{
       $gte: 7,
     },
     genres: {
-      $nin: ["Crime", "Horror"],
+      $nin: [
+        "Crime",
+        "Horror",
+      ],
     },
     rated: {
-      $in: ["PG", "G"],
+      $in: [
+        "PG",
+        "G",
+      ],
     },
     languages: {
-      $all: ["English", "Spanish"],
+      $all: [
+        "English",
+        "Spanish",
+      ],
     },
   },
 },
